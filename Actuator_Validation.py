@@ -18,18 +18,16 @@ ads3V = ADS.ADS1115(i2c)
 
 # pwm max setting is 100% duty cycle --> 100, set frequency to 1000
 
-
 def encoderTrig(channel):
     global encoderVal
     encoderVal = encoderVal+1
+
 
 
 DOWN_EN = 6 
 UP_EN = 5
 UP_PWM = 13
 DOWN_PWM = 12
-
-
 
 goButton = 4 
 endPin = 23  # (actuator fully extended)
@@ -47,6 +45,8 @@ GPIO.setup(UP_PWM, GPIO.OUT)
 GPIO.setup(DOWN_PWM, GPIO.OUT)
 
 GPIO.setup(goButton, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.add_event_detect(goButton, GPIO.FALLING, callback = goButtonPressed, bouncetime = 150)
+
 GPIO.setup(endPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(homePin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -73,8 +73,9 @@ def main():
     while True:
         if (GPIO.input(goButton) == GPIO.LOW and GPIO.input(endPin)):
             print('Encoder Val: ', encoderVal)
-            pwmDown.start(100)
-            while (GPIO.input(endPin) == GPIO.HIGH):
+            pwmDown.start(70)
+            time.sleep(.2)
+            while (GPIO.input(endPin) == GPIO.HIGH and GPIO.input(goButton) == GPIO.HIGH):
                 x =2
             pwmDown.stop()
             print('Encoder Val: ', encoderVal)
@@ -82,8 +83,9 @@ def main():
         
         if (GPIO.input(goButton) == GPIO.LOW and GPIO.input(homePin)):
             print('Encoder Val: ', encoderVal)
-            pwmUp.start(100)
-            while (GPIO.input(homePin) == GPIO.HIGH):
+            pwmUp.start(70)
+            time.sleep(.2)
+            while (GPIO.input(homePin) == GPIO.HIGH and GPIO.input(goButton) == GPIO.HIGH):
                 print(currentSensor.value)
             pwmUp.stop()
             print('Encoder Val: ', encoderVal)
